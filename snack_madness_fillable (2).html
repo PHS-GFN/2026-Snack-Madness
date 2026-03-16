@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snack Madness! — Fillable Bracket</title>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00;
+    --yellow: #FFD600;
+    --red: #D72638;
+    --dark: #1A1A2E;
+    --line: #555577;
+    --team-bg: #2C2C54;
+    --team-border: #444466;
+    --team-text: #c8c0ef;
+    --input-bg: #111128;
+    --input-border: #555577;
+    --win-bg: #FFD60018;
+    --winner-text: #FFD600;
+    --tw: 108px;
+    --th: 22px;
+    --fs: 0.6rem;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--dark);
+    background-image: radial-gradient(ellipse at 15% 50%, #2D1B6922 0%, transparent 50%), radial-gradient(ellipse at 85% 20%, #D7263822 0%, transparent 50%);
+    font-family: 'Roboto Condensed', sans-serif;
+    color: var(--team-text);
+    min-height: 100vh;
+    padding: 12px 0 30px;
+    overflow-x: hidden;
+  }
+  h1 { font-family:'Permanent Marker',cursive; text-align:center; font-size:clamp(1.6rem,4vw,3rem); color:var(--yellow); text-shadow:3px 3px 0 var(--red); margin-bottom:2px; }
+  .subtitle { text-align:center; font-family:'Oswald',sans-serif; font-size:0.75rem; color:#aaa; letter-spacing:3px; text-transform:uppercase; margin-bottom:4px; }
+  .instructions { text-align:center; font-size:0.65rem; color:#666; margin-bottom:12px; font-style:italic; }
+
+  /* Scale wrapper */
+  #scaleWrap {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #bracketInner {
+    width: 1020px;
+    flex-shrink: 0;
+    transform-origin: top center;
+  }
+
+  .full-bracket { display:flex; align-items:center; justify-content:center; width:1020px; }
+
+  .t {
+    background:var(--team-bg); border:1px solid var(--team-border); border-radius:3px;
+    padding:3px 5px; font-size:var(--fs); font-weight:700; color:var(--team-text);
+    white-space:nowrap; text-transform:uppercase; letter-spacing:0.3px;
+    height:var(--th); width:var(--tw); display:flex; align-items:center;
+    overflow:hidden; text-overflow:ellipsis; flex-shrink:0;
+  }
+  input.slot {
+    background:var(--input-bg); border:1px dashed var(--input-border); border-radius:3px;
+    padding:3px 5px; font-size:var(--fs); font-weight:700; color:var(--winner-text);
+    font-family:'Roboto Condensed',sans-serif; text-transform:uppercase; letter-spacing:0.3px;
+    height:var(--th); width:var(--tw); outline:none; flex-shrink:0;
+    transition:border-color 0.2s,background 0.2s;
+  }
+  input.slot:focus { border-color:var(--orange); border-style:solid; background:#1a1a3a; }
+  input.slot:not(:placeholder-shown) { background:var(--win-bg); border-color:var(--winner-text); border-style:solid; }
+  input.finalist {
+    width:100px; height:var(--th);
+    background:var(--input-bg); border:1px dashed var(--input-border); border-radius:3px;
+    padding:3px 5px; font-size:var(--fs); font-weight:700; color:var(--winner-text);
+    font-family:'Roboto Condensed',sans-serif; text-transform:uppercase; outline:none;
+  }
+  input.finalist:focus { border-color:var(--orange); border-style:solid; }
+  input.finalist:not(:placeholder-shown) { background:var(--win-bg); border-color:var(--winner-text); border-style:solid; }
+
+  .gl { font-family:'Permanent Marker',cursive; font-size:0.5rem; color:var(--orange); letter-spacing:1px; text-transform:uppercase; text-align:center; width:var(--tw); flex-shrink:0; line-height:1.4; }
+  .sp { flex-shrink:0; }
+  .round { display:flex; flex-direction:column; flex-shrink:0; align-items:flex-start; }
+
+  /* Bracket line helpers — inline styles used for connectors */
+
+  .champ-box {
+    background:linear-gradient(135deg,#331100,#1a0a20); border:3px dashed var(--yellow); border-radius:10px;
+    padding:10px 12px; text-align:center; width:150px; flex-shrink:0;
+    box-shadow:0 0 20px #FFD60022; display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .champ-box .emoji { font-size:1.5rem; }
+  .champ-box .lbl { font-family:'Permanent Marker',cursive; font-size:0.6rem; color:#fff6; letter-spacing:2px; }
+  input.champ-input {
+    background:transparent; border:none; border-bottom:2px solid var(--yellow);
+    color:var(--yellow); font-family:'Permanent Marker',cursive; font-size:1rem;
+    text-align:center; width:126px; outline:none; padding:2px 0;
+  }
+  input.champ-input::placeholder { color:#ffffff33; font-size:0.7rem; }
+  .vs-txt { font-family:'Permanent Marker',cursive; font-size:1rem; color:var(--red); text-shadow:2px 2px 0 #00000055; flex-shrink:0; }
+  .center-col { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; flex-shrink:0; padding:0 4px; }
+  .hc { height:2px; background:var(--line); flex-shrink:0; align-self:center; }
+
+  footer { text-align:center; margin-top:16px; font-family:'Permanent Marker',cursive; color:#444; font-size:0.65rem; letter-spacing:2px; }
+  .name-row { text-align:center; margin-top:10px; font-family:'Permanent Marker',cursive; color:#666; font-size:0.8rem; }
+  .name-row input { background:transparent; border:none; border-bottom:2px solid #444; color:var(--yellow); font-family:'Permanent Marker',cursive; font-size:0.85rem; width:180px; outline:none; padding:2px 6px; margin-left:6px; }
+  .btn-reset { display:block; margin:10px auto 0; background:transparent; border:1px solid #333; color:#555; font-family:'Oswald',sans-serif; font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; padding:5px 14px; border-radius:4px; cursor:pointer; transition:all 0.2s; }
+  .btn-reset:hover { border-color:var(--red); color:var(--red); }
+
+  /* reusable connector column built via inline */
+</style>
+</head>
+<body>
+
+<h1>🏆 Snack Madness! 🏆</h1>
+<p class="subtitle">Sweet vs Salty — Fill In Your Picks!</p>
+<p class="instructions">Click any dashed box to type your winner · Tab to advance</p>
+
+<div id="scaleWrap">
+<div id="bracketInner">
+<div class="full-bracket">
+
+<!-- ══════════════ LEFT R1: Seeded Sweet ══════════════ -->
+<div class="round" style="gap:2px;">
+  <div class="gl" style="font-size:0.65rem;color:var(--yellow);margin-bottom:2px;">🍪 Oreo Flavors</div>
+  <div class="t">Original Oreo</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Reese's</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Lemon</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Mint</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Vanilla</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Cookie Dough</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Toffee Crunch</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Java Chip</div>
+  <div class="sp" style="height:16px;border-left:none;"></div>
+  <div class="gl" style="font-size:0.65rem;color:var(--yellow);margin-bottom:2px;">🍬 M&amp;M Flavors</div>
+  <div class="t">Plain M&amp;Ms</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Caramel</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Peanut</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Almond</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Caramel Cold Brew</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Pretzel</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Peanut Butter</div><div class="sp" style="height:3px;"></div>
+  <div class="t">PB &amp; Jelly</div>
+</div>
+
+<!-- conn L R1→R2 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:13px;"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:16px;"></div>
+  <div style="height:13px;"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-right:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+</div>
+
+<!-- LEFT R2: fillable -->
+<div class="round" style="gap:2px;">
+  <div class="sp" style="height:36px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:8px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:36px;"></div>
+  <div class="sp" style="height:36px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:8px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:36px;"></div>
+</div>
+
+<!-- conn L R2→R3 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:36px;"></div>
+  <div style="display:flex;flex-direction:column;height:150px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:36px;"></div>
+  <div style="height:36px;"></div>
+  <div style="display:flex;flex-direction:column;height:150px;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:36px;"></div>
+</div>
+
+<!-- LEFT R3: fillable -->
+<div class="round" style="gap:2px;">
+  <div class="sp" style="height:92px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;"><div class="sp" style="height:16px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;">
+  <div class="sp" style="height:38px;"></div>
+  <div class="sp" style="height:92px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;"><div class="sp" style="height:16px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;">
+  <div class="sp" style="height:92px;"></div>
+</div>
+
+<!-- conn L R3→R4 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:103px;"></div>
+  <div style="display:flex;flex-direction:column;flex:1;"><div style="flex:1;border-right:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-right:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:103px;"></div>
+</div>
+
+<!-- LEFT R4: sweet finalists -->
+<div class="round" style="justify-content:center;gap:16px;">
+  <input class="finalist" type="text" placeholder="Sweet finalist…" maxlength="16">
+  <input class="finalist" type="text" placeholder="Sweet finalist…" maxlength="16">
+</div>
+<div class="hc" style="width:12px;"></div>
+
+<!-- ══════════════ CENTER ══════════════ -->
+<div class="center-col">
+  <div class="champ-box">
+    <span class="emoji">🏆</span>
+    <div class="lbl">GRAND CHAMPION</div>
+    <input class="champ-input" type="text" placeholder="Your pick…" maxlength="22">
+  </div>
+  <div class="vs-txt">SWEET vs SALTY</div>
+  <div style="font-family:'Permanent Marker',cursive;font-size:0.5rem;color:#555;letter-spacing:1px;text-align:center;">Which will be the<br>Grand Champion?</div>
+</div>
+<div class="hc" style="width:12px;"></div>
+
+<!-- ══════════════ RIGHT R4: salty finalists ══════════════ -->
+<div class="round" style="justify-content:center;gap:16px;align-items:flex-end;">
+  <input class="finalist" type="text" placeholder="Salty finalist…" maxlength="16">
+  <input class="finalist" type="text" placeholder="Salty finalist…" maxlength="16">
+</div>
+<div class="hc" style="width:10px;"></div>
+
+<!-- conn R R4→R3 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:103px;"></div>
+  <div style="display:flex;flex-direction:column;flex:1;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:103px;"></div>
+</div>
+
+<!-- RIGHT R3: fillable -->
+<div class="round" style="gap:2px;align-items:flex-end;">
+  <div class="sp" style="height:92px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;"><div class="sp" style="height:16px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;">
+  <div class="sp" style="height:38px;"></div>
+  <div class="sp" style="height:92px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;"><div class="sp" style="height:16px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18" style="width:100px;">
+  <div class="sp" style="height:92px;"></div>
+</div>
+
+<!-- conn R R3→R2 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:36px;"></div>
+  <div style="display:flex;flex-direction:column;height:150px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:36px;"></div>
+  <div style="height:36px;"></div>
+  <div style="display:flex;flex-direction:column;height:150px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:36px;"></div>
+</div>
+
+<!-- RIGHT R2: fillable -->
+<div class="round" style="gap:2px;align-items:flex-end;">
+  <div class="sp" style="height:36px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:8px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:36px;"></div>
+  <div class="sp" style="height:36px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:8px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18"><div class="sp" style="height:10px;"></div>
+  <input class="slot" type="text" placeholder="Winner…" maxlength="18">
+  <div class="sp" style="height:36px;"></div>
+</div>
+
+<!-- conn R R2→R1 -->
+<div style="display:flex;flex-direction:column;width:10px;flex-shrink:0;">
+  <div style="height:13px;"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:16px;"></div>
+  <div style="height:13px;"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+  <div style="height:8px;border-left:2px solid var(--line);"></div>
+  <div style="display:flex;flex-direction:column;height:47px;"><div style="flex:1;border-left:2px solid var(--line);border-top:2px solid var(--line);"></div><div style="flex:1;border-left:2px solid var(--line);border-bottom:2px solid var(--line);"></div></div>
+</div>
+
+<!-- RIGHT R1: Seeded Salty -->
+<div class="round" style="gap:2px;align-items:flex-end;">
+  <div class="gl" style="font-size:0.65rem;color:var(--yellow);margin-bottom:2px;width:var(--tw);text-align:center;">🥔 Pringles Flavors</div>
+  <div class="t">Pizza</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Cheddar</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Salt &amp; Vinegar</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Barbecue</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Sour Cream &amp; Onion</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Hot Honey</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Philly Cheese</div><div class="sp" style="height:3px;"></div>
+  <div class="t">7 Layer Dip</div>
+  <div class="sp" style="height:16px;"></div>
+  <div class="gl" style="font-size:0.65rem;color:var(--yellow);margin-bottom:2px;width:var(--tw);text-align:center;">🥨 Pretzel Flavors</div>
+  <div class="t">Sea Salt</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Cheddar Bacon</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Dill Pickle</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Buffalo Chicken</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Garlic Herb</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Peppercorn Ranch</div><div class="sp" style="height:8px;"></div>
+  <div class="t">Yellow Mustard</div><div class="sp" style="height:3px;"></div>
+  <div class="t">Honey Mustard</div>
+</div>
+
+</div><!-- end full-bracket -->
+</div><!-- end bracketInner -->
+</div><!-- end scaleWrap -->
+
+<div style="display:flex;justify-content:center;gap:50px;margin-top:10px;">
+  <div style="font-family:'Permanent Marker',cursive;font-size:1.1rem;color:var(--yellow);">🍫 SWEET</div>
+  <div style="font-family:'Permanent Marker',cursive;font-size:1.1rem;color:var(--orange);">🥨 SALTY</div>
+</div>
+<div class="name-row">Name: <input type="text" placeholder="Your name here…" maxlength="30"></div>
+<button class="btn-reset" onclick="document.querySelectorAll('input').forEach(i=>i.value='')">↺ Reset All Picks</button>
+<footer>SNACK MADNESS · Premier High School · Gallery Furniture North Campus</footer>
+
+<script>
+  function scale() {
+    const inner = document.getElementById('bracketInner');
+    const wrap = document.getElementById('scaleWrap');
+    const avail = wrap.clientWidth;
+    const s = Math.min(1, avail / 1020);
+    inner.style.transform = 'scale(' + s + ')';
+    // Collapse whitespace from scaling
+    const naturalH = inner.scrollHeight;
+    wrap.style.height = Math.ceil(naturalH * s) + 'px';
+  }
+  scale();
+  window.addEventListener('resize', scale);
+</script>
+</body>
+</html>
